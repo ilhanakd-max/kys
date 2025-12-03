@@ -1707,6 +1707,40 @@
     </div>
 
     <script>
+async function updateDB(data) {
+    try{
+        await fetch("https://api.github.com/repos/ilhanakd-max/kys/actions/workflows/main.yml/dispatches", {
+            method: "POST",
+            headers: {
+                "Accept": "application/vnd.github+json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ref: "main",
+                inputs: {
+                    payload: JSON.stringify(data)
+                }
+            })
+        });
+        console.log("DB update dispatched");
+    }catch(e){console.error(e);}
+}
+
+async function loadDB() {
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/ilhanakd-max/kys/main/db.json?ts=" + Date.now());
+        return await res.json();
+    } catch (e) {
+        console.error("DB load failed", e);
+        return null;
+    }
+}
+
+async function initCloud() {
+    const cloud = await loadDB();
+    if(cloud){ window.data = cloud; }
+}
+
         // ==================== Data Storage ====================
         let data = {
             courses: [],
@@ -1733,6 +1767,7 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', function() {
+            await initCloud();
             loadData();
             initializeDefaultHolidays();
             updateDateTime();
@@ -1749,9 +1784,7 @@
             }
         }
 
-        function saveData() {
-            localStorage.setItem('cesmeKursData', JSON.stringify(data));
-        }
+        function saveData(){ updateDB(data); }
 
         function initializeDefaultHolidays() {
             if (data.holidays.length === 0) {
