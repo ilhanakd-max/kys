@@ -1,0 +1,29 @@
+name: Update DB JSON
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: "JSON Data"
+        required: true
+        default: "{}"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Update db.json
+        run: |
+          echo '${{ github.event.inputs.payload }}' > db.json
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: db.json
+          message: "DB Updated Automatically"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
